@@ -1,7 +1,7 @@
-<!-- index.html – COVID-19 Outbreaks Dashboard
+<!-- index.html – COVID-19 Outbreaks 2021 Dashboard
      ------------------------------------------------------------
-     Drop this file + covid-19outbreakstotal2021byindustry_02apr25.csv
-     in the same folder and open with a browser or any static server.
+     Keep this file **and** covid-19outbreakstotal2021byindustry_02apr25.csv
+     in the same folder. Open with a browser (file://) or any static server.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -10,29 +10,30 @@
   <title>COVID-19 Outbreaks 2021 – Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!---- Bootstrap 5.3.x (pinned) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
+  <!-- Bootstrap 5.3.x (pinned) -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         integrity="sha384-9ndCyUa7SA/N1Qp+Fftyd7jckq9Q1DPZb7p4v8N21JxrYhXBqlp7sRy21yMibVc3"
-        crossorigin="anonymous" />
+        crossorigin="anonymous">
 
-  <!---- DataTables 1.13.x CSS -->
-  <link href="https://cdn.datatables.net/1.13.10/css/jquery.dataTables.min.css" rel="stylesheet" />
+  <!-- DataTables 1.13.x CSS -->
+  <link rel="stylesheet"
+        href="https://cdn.datatables.net/1.13.10/css/jquery.dataTables.min.css">
 
   <style>
-    body { background:#f8f9fa; }
-    .kpi-card { box-shadow:0 2px 4px rgba(0,0,0,.06); }
-    .kpi-value { font-size:2rem; font-weight:600; }
-    .chart-wrap { box-shadow:0 2px 4px rgba(0,0,0,.06); background:#fff; border-radius:.5rem; padding:.5rem; }
+    body            { background:#f8f9fa; }
+    .kpi-card       { box-shadow:0 2px 4px rgba(0,0,0,.06); }
+    .kpi-value      { font-size:2rem; font-weight:600; }
+    .chart-wrapper  { background:#fff; border-radius:.5rem; box-shadow:0 2px 4px rgba(0,0,0,.06); padding:.75rem; }
   </style>
 </head>
 <body>
 <div class="container-fluid py-3">
 
-  <!-- KPI cards -->
+  <!-- ── KPI CARDS ────────────────────────────────────────────── -->
   <div class="row gy-3" id="kpiRow">
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center">
+      <div class="card kpi-card text-center h-100">
         <div class="card-body">
           <h6>Total Outbreaks</h6>
           <div id="kpiOutbreaks" class="kpi-value">–</div>
@@ -40,7 +41,7 @@
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center">
+      <div class="card kpi-card text-center h-100">
         <div class="card-body">
           <h6>Total Cases</h6>
           <div id="kpiCases" class="kpi-value">–</div>
@@ -48,7 +49,7 @@
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center">
+      <div class="card kpi-card text-center h-100">
         <div class="card-body">
           <h6>Industry Sectors</h6>
           <div id="kpiSectors" class="kpi-value">–</div>
@@ -56,7 +57,7 @@
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center">
+      <div class="card kpi-card text-center h-100">
         <div class="card-body">
           <h6>Individual Settings</h6>
           <div id="kpiSettings" class="kpi-value">–</div>
@@ -65,23 +66,25 @@
     </div>
   </div>
 
-  <!-- Charts -->
+  <!-- ── CHARTS ──────────────────────────────────────────────── -->
   <div class="row gy-4 mt-1">
     <div class="col-12 col-lg-6">
-      <div class="chart-wrap">
-        <h6 class="text-center pt-2">Top 10 Industry Sectors by Outbreaks</h6>
-        <div id="sectorChart" aria-label="Bar chart showing top industry sectors by outbreaks" role="img"></div>
+      <div class="chart-wrapper">
+        <h6 class="text-center pt-2">COVID-19 Outbreaks In 2021: Top 10 Industry Sectors</h6>
+        <div id="sectorChart" role="img"
+             aria-label="Vertical bar chart showing the ten industry sectors with the most COVID-19 outbreaks"></div>
       </div>
     </div>
     <div class="col-12 col-lg-6">
-      <div class="chart-wrap">
-        <h6 class="text-center pt-2">Top 10 Individual Settings by Outbreaks</h6>
-        <div id="settingChart" aria-label="Bar chart showing top individual settings by outbreaks" role="img"></div>
+      <div class="chart-wrapper">
+        <h6 class="text-center pt-2">COVID-19 Outbreaks In 2021: Top 10 Individual Settings</h6>
+        <div id="settingChart" role="img"
+             aria-label="Vertical bar chart showing the ten individual settings with the most COVID-19 outbreaks"></div>
       </div>
     </div>
   </div>
 
-  <!-- Data table -->
+  <!-- ── DATA TABLE ──────────────────────────────────────────── -->
   <div class="row gy-4 mt-1">
     <div class="col-12">
       <div class="table-responsive">
@@ -104,124 +107,117 @@
 
 </div>
 
-<!---- jQuery (for DataTables) -->
+<!-- ── SCRIPTS ──────────────────────────────────────────────── -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"
         integrity="sha384-xl225mXg1VV2GkVk5FipITk+8znkQOBbJqOxl/k6AccJq2TuOXrZLpxyzVwBNE+7"
         crossorigin="anonymous"></script>
 
-<!---- Bootstrap JS (optional for components) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-hKo9+17jKB8qdKYDu3L1kW9ciKcQym4Yv0+ALQnBEcPjFcwZ1sHx1ay3OKWz3L7i"
         crossorigin="anonymous"></script>
 
-<!---- Papa Parse 5.x -->
+<!-- Papa Parse 5.x -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-<!---- Plotly 2.x -->
+<!-- Plotly 2.x -->
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 
-<!---- DataTables 1.13.x -->
+<!-- DataTables 1.13.x -->
 <script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
 
 <script>
 /*--------------------------------------------------------------
-  Change the line below if you move/rename the CSV file
+  Change this line if you move the CSV
 --------------------------------------------------------------*/
 const CSV_PATH = 'covid-19outbreakstotal2021byindustry_02apr25.csv';
 
 /*--------------------------------------------------------------
-  Utility
---------------------------------------------------------------*/
-const int = v => Number.parseInt(v || 0, 10);
-
-/*--------------------------------------------------------------
-  Load & build dashboard
+  Init – load CSV & build dashboard
 --------------------------------------------------------------*/
 Papa.parse(CSV_PATH, {
   download: true,
   header: true,
   dynamicTyping: true,
   skipEmptyLines: true,
-  complete: ({data}) => buildDashboard(data),
-  error: (err) => alert('⚠ Unable to load CSV: ' + err.message)
+  complete: ({ data }) => buildDashboard(data),
+  error  : err => alert('⚠️  Unable to load CSV: ' + err.message)
 });
 
+/*--------------------------------------------------------------
+  Dashboard builder
+--------------------------------------------------------------*/
 function buildDashboard(rows) {
-  /* --- KPI cards --- */
-  const totalOutbreaks = rows.reduce((s,r)=>s+int(r.Outbreaks),0);
-  const totalCases     = rows.reduce((s,r)=>s+int(r.Cases),0);
-  const sectors        = new Set(rows.map(r=>r.IndustrySector)).size;
-  const settings       = new Set(rows.map(r=>r.IndividualSetting)).size;
+  /* ── KPI CARDS ───────────────────────────────────────────── */
+  const sum  = (arr, k) => arr.reduce((s, r) => s + (+r[k] || 0), 0);
+  const uniq = (arr, k) => new Set(arr.map(r => r[k])).size;
 
-  document.getElementById('kpiOutbreaks').textContent = totalOutbreaks.toLocaleString();
-  document.getElementById('kpiCases').textContent     = totalCases.toLocaleString();
-  document.getElementById('kpiSectors').textContent   = sectors;
-  document.getElementById('kpiSettings').textContent  = settings;
+  $('#kpiOutbreaks').text(sum(rows, 'Outbreaks').toLocaleString());
+  $('#kpiCases').text(sum(rows, 'Cases').toLocaleString());
+  $('#kpiSectors').text(uniq(rows, 'IndustrySector'));
+  $('#kpiSettings').text(uniq(rows, 'IndividualSetting'));
 
-/* ---------- Top 10 Industry Sectors (vertical, angle labels, orange) ---------- */
-Plotly.newPlot('sectorChart', [{
-  type: 'bar',
-  x: topSectors.map(x => x[0]),          // categories on X
-  y: topSectors.map(x => x[1]),          // values on Y
-  marker: { color: '#ffb000' },          // WCAG-AA orange
-  hovertemplate: '%{x}: %{y:,}<extra></extra>'
-}], {
-  title: { text: 'COVID-19 Outbreaks In 2021: Top 10 Industry Sectors', pad: { b: 10 } },
-  margin: { l: 60, r: 20, t: 50, b: 120 },
-  yaxis: {
-    title: 'Number of Outbreaks',
-    gridcolor: 'rgba(0,0,0,.1)',
-    tickformat: ','
-  },
-  xaxis: {
-    tickangle: -45,
-    automargin: true
-  },
-  height: 520
-}, { displayModeBar: false, responsive: true });
+  /* ── Helpers to get top-N lists ─────────────────────────── */
+  const topN = (arr, key, n, filterFn = () => true) => {
+    const agg = {};
+    arr.filter(filterFn).forEach(r => {
+      agg[r[key]] = (agg[r[key]] || 0) + (+r.Outbreaks || 0);
+    });
+    return Object.entries(agg)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, n);
+  };
 
-/* ---------- Top 10 Individual Settings (same visual style) ---------- */
-Plotly.newPlot('settingChart', [{
-  type: 'bar',
-  x: topSettings.map(x => x[0]),
-  y: topSettings.map(x => x[1]),
-  marker: { color: '#ffb000' },
-  hovertemplate: '%{x}: %{y:,}<extra></extra>'
-}], {
-  title: { text: 'COVID-19 Outbreaks In 2021: Top 10 Individual Settings', pad: { b: 10 } },
-  margin: { l: 60, r: 20, t: 50, b: 120 },
-  yaxis: {
-    title: 'Number of Outbreaks',
-    gridcolor: 'rgba(0,0,0,.1)',
-    tickformat: ','
-  },
-  xaxis: {
-    tickangle: -45,
-    automargin: true
-  },
-  height: 520
-}, { displayModeBar: false, responsive: true });
+  /* ── Top 10 Industry Sectors (vertical bars) ────────────── */
+  const sectorData = topN(rows, 'IndustrySector', 10);
+  Plotly.newPlot('sectorChart', [{
+    type: 'bar',
+    x   : sectorData.map(d => d[0]),
+    y   : sectorData.map(d => d[1]),
+    marker: { color: '#ffb000' },        // WCAG-AA orange
+    hovertemplate: '%{x}: %{y:,}<extra></extra>'
+  }], {
+    margin : { l: 60, r: 20, t: 10, b: 120 },
+    yaxis  : { title: 'Number of Outbreaks', tickformat: ',', gridcolor: 'rgba(0,0,0,.1)' },
+    xaxis  : { tickangle: -45, automargin: true }
+  }, { responsive: true, displayModeBar: false });
 
+  /* ── Top 10 Individual Settings (filter "total/all") ────── */
+  const excludeTotals = r => {
+    const s = (r.IndividualSetting || '').toLowerCase();
+    return !['total', 'all settings', 'all setting', 'all'].includes(s);
+  };
+  const settingData = topN(rows, 'IndividualSetting', 10, excludeTotals);
+  Plotly.newPlot('settingChart', [{
+    type: 'bar',
+    x   : settingData.map(d => d[0]),
+    y   : settingData.map(d => d[1]),
+    marker: { color: '#ffb000' },
+    hovertemplate: '%{x}: %{y:,}<extra></extra>'
+  }], {
+    margin : { l: 60, r: 20, t: 10, b: 120 },
+    yaxis  : { title: 'Number of Outbreaks', tickformat: ',', gridcolor: 'rgba(0,0,0,.1)' },
+    xaxis  : { tickangle: -45, automargin: true }
+  }, { responsive: true, displayModeBar: false });
 
-  /* --- DataTable --- */
+  /* ── DataTable ──────────────────────────────────────────── */
   const tbody = document.querySelector('#dataTable tbody');
-  rows.forEach(r=>{
+  rows.forEach(r => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.Year}</td>
       <td>${r.IndustrySector}</td>
       <td>${r.IndividualSetting}</td>
       <td>${r.IndCode}</td>
-      <td>${int(r.Outbreaks)}</td>
-      <td>${int(r.Cases)}</td>`;
+      <td>${(+r.Outbreaks || 0).toLocaleString()}</td>
+      <td>${(+r.Cases     || 0).toLocaleString()}</td>`;
     tbody.appendChild(tr);
   });
 
   $('#dataTable').DataTable({
-    pageLength:25,
-    order:[[0,'desc']],
-    responsive:true,
-    dom:'<"row"<"col-sm-6"f><"col-sm-6"l>>tip'
+    pageLength : 25,
+    order      : [[0, 'desc']],
+    responsive : true,
+    dom        : '<"row"<"col-sm-6"f><"col-sm-6"l>>tip'
   });
 }
 </script>
