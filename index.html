@@ -18,14 +18,19 @@
   <style>
     /* Minimalist styling */
     body            { background:#f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
-    .kpi-card       { border: none; box-shadow: 0 2px 4px rgba(0,0,0,.06); }
+    .kpi-card       { border: 2px solid #6c757d; box-shadow: 0 2px 4px rgba(0,0,0,.06); border-radius: .375rem; /* Added default border & radius */ }
     .kpi-value      { font-size: 2rem; font-weight: 600; color: #212529; }
     .kpi-card h6    { color: #6c757d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
-    .chart-wrapper  { background:#fff; border-radius:.5rem; box-shadow: 0 2px 4px rgba(0,0,0,.06); padding: 1rem; }
+    .chart-wrapper  { background:#fff; border-radius:.5rem; box-shadow: 0 2px 4px rgba(0,0,0,.06); padding: 1rem; border: 1px solid #dee2e6; } /* Added border */
     .chart-wrapper h6 { color: #495057; }
     #dataTable_wrapper .row:first-child { margin-bottom: 0.5rem; } /* Adjust DataTable control spacing */
     #dataTable th    { font-weight: 600; }
     .table-responsive { background:#fff; border-radius:.5rem; box-shadow: 0 2px 4px rgba(0,0,0,.06); padding: 1rem; }
+
+    /* Specific KPI Card Outline Colors - Target card within the ID'd column */
+    #kpiColCases .kpi-card    { border-color: #0d6efd; } /* Bootstrap Blue */
+    #kpiColSectors .kpi-card  { border-color: #198754; } /* Bootstrap Green */
+    #kpiColSettings .kpi-card { border-color: #ffc107; } /* Bootstrap Yellow */
   </style>
 </head>
 <body>
@@ -37,7 +42,7 @@
   <div class="row gy-3 mb-4" id="kpiRow">
     <!-- Year-wise outbreak cards will be inserted here by JS -->
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center h-100">
+      <div id="kpiColCases" class="card kpi-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
           <h6>Total Cases</h6>
           <div id="kpiCases" class="kpi-value">–</div>
@@ -45,7 +50,7 @@
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center h-100">
+      <div id="kpiColSectors" class="card kpi-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
           <h6>Industry Sectors</h6>
           <div id="kpiSectors" class="kpi-value">–</div>
@@ -53,7 +58,7 @@
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card kpi-card text-center h-100">
+      <div id="kpiColSettings" class="card kpi-card text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
           <h6>Individual Settings</h6>
           <div id="kpiSettings" class="kpi-value">–</div>
@@ -64,6 +69,7 @@
 
   <!-- ── CHARTS ──────────────────────────────────────────────── -->
   <div class="row gy-4 mb-4">
+    <!-- Row 1 of Charts -->
     <div class="col-12 col-lg-6">
       <div class="chart-wrapper h-100">
         <h6 class="text-center pt-1 mb-3">Industry Sectors by Outbreaks (Excluding Total)</h6>
@@ -73,10 +79,25 @@
     </div>
     <div class="col-12 col-lg-6">
       <div class="chart-wrapper h-100">
+        <h6 class="text-center pt-1 mb-3">Industry Sectors by Total Cases (Excluding Total)</h6>
+        <div id="sectorCasesChart" role="img"
+             aria-label="Vertical bar chart showing the industry sectors with the most COVID-19 cases"></div>
+      </div>
+    </div>
+    <!-- Row 2 of Charts -->
+    <div class="col-12 col-lg-6">
+      <div class="chart-wrapper h-100">
         <h6 class="text-center pt-1 mb-3">Top 10 Individual Settings by Outbreaks</h6>
         <div id="settingChart" role="img"
              aria-label="Vertical bar chart showing the ten individual settings with the most COVID-19 outbreaks"></div>
       </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="chart-wrapper h-100">
+        <h6 class="text-center pt-1 mb-3">Top 10 Individual Settings by Total Cases</h6>
+        <div id="settingCasesChart" role="img"
+             aria-label="Vertical bar chart showing the ten individual settings with the most COVID-19 cases"></div>
+      </div>      
     </div>
   </div>
 
@@ -131,6 +152,7 @@
 const CSV_PATH = 'covid-19occu.csv';
 
 const PLOTLY_BAR_COLOR = '#0d6efd'; // Bootstrap primary blue
+const PLOTLY_BAR_COLOR_ALT = '#6f42c1'; // Bootstrap purple (example for the second sector chart)
 const PLOTLY_CONFIG = { responsive: true, displayModeBar: false };
 const PLOTLY_LAYOUT_DEFAULTS = {
   margin: { l: 60, r: 20, t: 10, b: 120 }, // Adjusted for rotated labels
@@ -201,7 +223,9 @@ function buildDashboard(rows) {
   try {
     updateKpiCards(rows);
     createTopSectorsChart(rows);
+    createCasesBySectorChart(rows); // <-- Add call for the new chart
     createTopSettingsChart(rows);
+    createTopSettingsCasesChart(rows); // <-- Add call for the new settings cases chart
     populateDataTable(rows);
   } catch (error) {
     console.error("Error building dashboard components:", error);
@@ -301,6 +325,29 @@ function createTopSectorsChart(rows) {
   Plotly.newPlot('sectorChart', plotData, layout, PLOTLY_CONFIG);
 }
 
+/* ── Industry Sectors by Cases Chart ────────────────────── */
+function createCasesBySectorChart(rows) {
+  // Use the same filter as the outbreaks chart
+  const excludeSummarySectors = (row) => {
+    const sector = (row.IndustrySector || '').toString().toLowerCase().trim();
+    return !['total', ''].includes(sector); // Exclude "Total" and empty sectors
+  };
+
+  // Aggregate by 'IndustrySector' but sum 'Cases' this time
+  const casesBySector = aggregateAndGetTopN(rows, 'IndustrySector', 'Cases', Infinity, excludeSummarySectors); // Get all, filtered
+
+  const plotData = [{
+    type: 'bar',
+    x: casesBySector.map(([sector]) => sector),
+    y: casesBySector.map(([, cases]) => cases), // Use cases for y-axis
+    marker: { color: PLOTLY_BAR_COLOR_ALT }, // Use the alternate color
+    hovertemplate: '%{x}: %{y:,} cases<extra></extra>' // Update hover text
+  }];
+
+  const layout = { ...PLOTLY_LAYOUT_DEFAULTS, yaxis: { ...PLOTLY_LAYOUT_DEFAULTS.yaxis, title: 'Total Cases' } }; // Clone defaults and update y-axis title
+  Plotly.newPlot('sectorCasesChart', plotData, layout, PLOTLY_CONFIG);
+}
+
 /* ── Top 10 Individual Settings Chart ───────────────────── */
 function createTopSettingsChart(rows) {
   // Filter out rows where IndividualSetting is likely a total/summary
@@ -322,6 +369,29 @@ function createTopSettingsChart(rows) {
   const layout = { ...PLOTLY_LAYOUT_DEFAULTS }; // Clone defaults
 
   Plotly.newPlot('settingChart', plotData, layout, PLOTLY_CONFIG);
+}
+
+/* ── Top 10 Individual Settings by Cases Chart ──────────── */
+function createTopSettingsCasesChart(rows) {
+  // Use the same filter as the outbreaks chart
+  const excludeSummarySettings = (row) => {
+    const setting = (row.IndividualSetting || '').toString().toLowerCase().trim();
+    return !['total', 'all settings', 'all setting', 'all', ''].includes(setting);
+  };
+
+  // Aggregate by 'IndividualSetting' but sum 'Cases' this time, take top 10
+  const topSettingsCases = aggregateAndGetTopN(rows, 'IndividualSetting', 'Cases', 10, excludeSummarySettings);
+
+  const plotData = [{
+    type: 'bar',
+    x: topSettingsCases.map(([setting]) => setting),
+    y: topSettingsCases.map(([, cases]) => cases), // Use cases for y-axis
+    marker: { color: PLOTLY_BAR_COLOR },
+    hovertemplate: '%{x}: %{y:,} cases<extra></extra>' // Update hover text
+  }];
+
+  const layout = { ...PLOTLY_LAYOUT_DEFAULTS, yaxis: { ...PLOTLY_LAYOUT_DEFAULTS.yaxis, title: 'Total Cases' } }; // Clone defaults and update y-axis title
+  Plotly.newPlot('settingCasesChart', plotData, layout, PLOTLY_CONFIG);
 }
 
 /* ── Data Table Population ──────────────────────────────── */
