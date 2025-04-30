@@ -158,48 +158,50 @@ function buildDashboard(rows) {
   document.getElementById('kpiSectors').textContent   = sectors;
   document.getElementById('kpiSettings').textContent  = settings;
 
-  /* --- Top 10 Industry Sectors --- */
-  const topSectors = Object.values(rows.reduce((acc,r)=>{
-      acc[r.IndustrySector] = (acc[r.IndustrySector]||0) + int(r.Outbreaks); return acc;
-    },{}))
-    && Object.entries(rows.reduce((acc,r)=>{
-      acc[r.IndustrySector] = (acc[r.IndustrySector]||0) + int(r.Outbreaks); return acc;
-    },{}))
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,10);
+/* ---------- Top 10 Industry Sectors (vertical, angle labels, orange) ---------- */
+Plotly.newPlot('sectorChart', [{
+  type: 'bar',
+  x: topSectors.map(x => x[0]),          // categories on X
+  y: topSectors.map(x => x[1]),          // values on Y
+  marker: { color: '#ffb000' },          // WCAG-AA orange
+  hovertemplate: '%{x}: %{y:,}<extra></extra>'
+}], {
+  title: { text: 'COVID-19 Outbreaks In 2021: Top 10 Industry Sectors', pad: { b: 10 } },
+  margin: { l: 60, r: 20, t: 50, b: 120 },
+  yaxis: {
+    title: 'Number of Outbreaks',
+    gridcolor: 'rgba(0,0,0,.1)',
+    tickformat: ','
+  },
+  xaxis: {
+    tickangle: -45,
+    automargin: true
+  },
+  height: 520
+}, { displayModeBar: false, responsive: true });
 
-  Plotly.newPlot('sectorChart',[{
-      type:'bar',
-      x: topSectors.map(x=>x[1]).reverse(),
-      y: topSectors.map(x=>x[0]).reverse(),
-      orientation:'h',
-      hovertemplate:'%{y}: %{x}<extra></extra>'
-    }],{
-      margin:{l:140,r:20,t:10,b:30},
-      height:400
-    },{displayModeBar:false, responsive:true});
+/* ---------- Top 10 Individual Settings (same visual style) ---------- */
+Plotly.newPlot('settingChart', [{
+  type: 'bar',
+  x: topSettings.map(x => x[0]),
+  y: topSettings.map(x => x[1]),
+  marker: { color: '#ffb000' },
+  hovertemplate: '%{x}: %{y:,}<extra></extra>'
+}], {
+  title: { text: 'COVID-19 Outbreaks In 2021: Top 10 Individual Settings', pad: { b: 10 } },
+  margin: { l: 60, r: 20, t: 50, b: 120 },
+  yaxis: {
+    title: 'Number of Outbreaks',
+    gridcolor: 'rgba(0,0,0,.1)',
+    tickformat: ','
+  },
+  xaxis: {
+    tickangle: -45,
+    automargin: true
+  },
+  height: 520
+}, { displayModeBar: false, responsive: true });
 
-  /* --- Top 10 Individual Settings (exclude “Total/All Settings”) --- */
-  const filtered = rows.filter(r=>{
-    const s = (r.IndividualSetting||'').toLowerCase();
-    return !['total','all settings','all setting','all'].includes(s);
-  });
-  const topSettings = Object.entries(filtered.reduce((acc,r)=>{
-      acc[r.IndividualSetting] = (acc[r.IndividualSetting]||0) + int(r.Outbreaks); return acc;
-    },{}))
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,10);
-
-  Plotly.newPlot('settingChart',[{
-      type:'bar',
-      x: topSettings.map(x=>x[1]).reverse(),
-      y: topSettings.map(x=>x[0]).reverse(),
-      orientation:'h',
-      hovertemplate:'%{y}: %{x}<extra></extra>'
-    }],{
-      margin:{l:140,r:20,t:10,b:30},
-      height:400
-    },{displayModeBar:false, responsive:true});
 
   /* --- DataTable --- */
   const tbody = document.querySelector('#dataTable tbody');
