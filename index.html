@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>COVID-19 Outbreaks Dashboard</title>
+  <title>COVID‑19 Outbreaks Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Bootstrap 5.3.x (pinned) -->
@@ -16,88 +16,114 @@
         href="https://cdn.datatables.net/1.13.10/css/jquery.dataTables.min.css">
 
   <style>
-    /* Minimalist styling */
-    body            { background:#f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
-    .kpi-card       { border: 2px solid #6c757d; box-shadow: 0 2px 4px rgba(0,0,0,.06); border-radius: .375rem; /* Added default border & radius */ }
-    .kpi-value      { font-size: 2rem; font-weight: 600; color: #212529; }
-    .kpi-card h6    { color: #6c757d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
-    .chart-wrapper  { background:#fff; border-radius:.5rem; box-shadow: 0 2px 4px rgba(0,0,0,.06); padding: 1rem; border: 1px solid #dee2e6; } /* Added border */
-    .chart-wrapper h6 { color: #495057; }
-    #dataTable_wrapper .row:first-child { margin-bottom: 0.5rem; } /* Adjust DataTable control spacing */
-    #dataTable th    { font-weight: 600; }
-    .table-responsive { background:#fff; border-radius:.5rem; box-shadow: 0 2px 4px rgba(0,0,0,.06); padding: 1rem; }
+    /* ─── General ──────────────────────────────────────────────────────── */
+    body{
+      background:#f3f4f6; /* light slate */
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    }
 
-    /* Specific KPI Card Outline Colors - Target card within the ID'd column */
-    #kpiColCases .kpi-card    { border-color: #0d6efd; } /* Bootstrap Blue */
-    #kpiColSectors .kpi-card  { border-color: #198754; } /* Bootstrap Green */
-    #kpiColSettings .kpi-card { border-color: #ffc107; } /* Bootstrap Yellow */
+    h3{
+      font-weight:700;
+      letter-spacing:-.02em;
+    }
+
+    /* ─── KPI ROW ─────────────────────────────────────────────────────── */
+    #kpiRow{
+      display:flex;            /* horizontal layout */
+      flex-wrap:nowrap;        /* single row */
+      gap:1rem;                /* space between cards */
+      overflow-x:auto;         /* scroll on small screens */
+      padding-bottom:0.25rem;  /* give space under the row */
+      scrollbar-width:thin;    /* Firefox */
+    }
+    #kpiRow::-webkit-scrollbar{height:.5rem}
+    #kpiRow::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:.25rem}
+
+    /* ─── KPI CARD ────────────────────────────────────────────────────── */
+    .kpi-card{
+      min-width:180px;        /* ensure readable width */
+      border-radius:.75rem;   /* 12px */
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      padding:1.25rem 1.5rem; /* generous inner spacing */
+      color:#fff;
+      position:relative;
+      overflow:hidden;
+      transition:transform .2s ease,box-shadow .2s ease;
+    }
+    .kpi-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+    }
+    .kpi-label{
+      font-size:.75rem;    /* 12px */
+      font-weight:600;     /* semibold */
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      opacity:.9;
+      margin-bottom:.25rem;
+      white-space:nowrap;
+    }
+    .kpi-value{
+      font-size:2rem;      /* 32px */
+      font-weight:700;
+      line-height:1.1;
+    }
+
+    /* Vibrant palette */
+    .bg-indigo {background:#4f46e5;}
+    .bg-teal   {background:#14b8a6;}
+    .bg-amber  {background:#f59e0b;}
+    .bg-emerald{background:#10b981;}
+    .bg-coral  {background:#ff7f50;}
+    .bg-violet {background:#8b5cf6;}
+    .bg-sky    {background:#38bdf8;}
+    .bg-slate  {background:#64748b;}
+
+    /* ─── Containers ──────────────────────────────────────────────────── */
+    .chart-wrapper,.table-responsive{
+      background:#fff;
+      border-radius:.75rem;
+      border:1px solid #e2e8f0;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      padding:1rem;
+    }
+    .chart-wrapper h6{color:#475569;font-weight:600;}
+
   </style>
 </head>
 <body>
 <div class="container-fluid py-4">
 
-  <h3 class="mb-4 text-center text-secondary">COVID-19 Outbreaks Dashboard</h3>
+  <h3 class="mb-4 text-center text-secondary">COVID‑19 Outbreaks Dashboard</h3>
 
   <!-- ── KPI CARDS ────────────────────────────────────────────── -->
-  <div class="row gy-3 mb-4" id="kpiRow">
-    <!-- Year-wise outbreak cards will be inserted here by JS -->
-    <div class="col-6 col-md-3">
-      <div id="kpiColCases" class="card kpi-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6>Total Cases</h6>
-          <div id="kpiCases" class="kpi-value">–</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div id="kpiColSectors" class="card kpi-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6>Industry Sectors</h6>
-          <div id="kpiSectors" class="kpi-value">–</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div id="kpiColSettings" class="card kpi-card text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h6>Individual Settings</h6>
-          <div id="kpiSettings" class="kpi-value">–</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="kpiRow"><!-- KPI cards injected by JS --></div>
 
   <!-- ── CHARTS ──────────────────────────────────────────────── -->
   <div class="row gy-4 mb-4">
-    <!-- Row 1 of Charts -->
     <div class="col-12 col-lg-6">
       <div class="chart-wrapper h-100">
-        <h6 class="text-center pt-1 mb-3">Industry Sectors by Outbreaks (Excluding Total)</h6>
-        <div id="sectorChart" role="img"
-             aria-label="Vertical bar chart showing the ten industry sectors with the most COVID-19 outbreaks"></div>
+        <h6 class="text-center mb-3">Industry Sectors by Outbreaks (Excl. Total)</h6>
+        <div id="sectorChart" role="img" aria-label="Bar chart showing the industry sectors with the most COVID‑19 outbreaks"></div>
       </div>
     </div>
     <div class="col-12 col-lg-6">
       <div class="chart-wrapper h-100">
-        <h6 class="text-center pt-1 mb-3">Industry Sectors by Total Cases (Excluding Total)</h6>
-        <div id="sectorCasesChart" role="img"
-             aria-label="Vertical bar chart showing the industry sectors with the most COVID-19 cases"></div>
-      </div>
-    </div>
-    <!-- Row 2 of Charts -->
-    <div class="col-12 col-lg-6">
-      <div class="chart-wrapper h-100">
-        <h6 class="text-center pt-1 mb-3">Top 10 Individual Settings by Outbreaks</h6>
-        <div id="settingChart" role="img"
-             aria-label="Vertical bar chart showing the ten individual settings with the most COVID-19 outbreaks"></div>
+        <h6 class="text-center mb-3">Industry Sectors by Total Cases (Excl. Total)</h6>
+        <div id="sectorCasesChart" role="img" aria-label="Bar chart showing industry sectors with the most COVID‑19 cases"></div>
       </div>
     </div>
     <div class="col-12 col-lg-6">
       <div class="chart-wrapper h-100">
-        <h6 class="text-center pt-1 mb-3">Top 10 Individual Settings by Total Cases</h6>
-        <div id="settingCasesChart" role="img"
-             aria-label="Vertical bar chart showing the ten individual settings with the most COVID-19 cases"></div>
-      </div>      
+        <h6 class="text-center mb-3">Top 10 Individual Settings by Outbreaks</h6>
+        <div id="settingChart" role="img" aria-label="Bar chart showing the settings with the most outbreaks"></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="chart-wrapper h-100">
+        <h6 class="text-center mb-3">Top 10 Individual Settings by Total Cases</h6>
+        <div id="settingCasesChart" role="img" aria-label="Bar chart showing settings with the most cases"></div>
+      </div>
     </div>
   </div>
 
@@ -116,322 +142,122 @@
               <th>Cases</th>
             </tr>
           </thead>
-          <tbody><!-- Data will be populated by JavaScript --></tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
   </div>
 
-</div> <!-- End container-fluid -->
+</div>
 
 <!-- ── SCRIPTS ──────────────────────────────────────────────── -->
-<!-- jQuery 3.6.x (needed for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"
-        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
-        crossorigin="anonymous"></script>
-
-<!-- Bootstrap 5.3.x JS Bundle -->
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
-<!-- Papa Parse 5.4.x -->
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<!-- Plotly 2.32.x -->
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-
-<!-- DataTables 1.13.x -->
 <script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
 
 <script>
-/*--------------------------------------------------------------
-  Configuration
---------------------------------------------------------------*/
-// Change this line if you move or rename the CSV
+/* -------------------------------------------------------------
+   Configuration
+----------------------------------------------------------------*/
 const CSV_PATH = 'covid-19occu.csv';
-
-const PLOTLY_BAR_COLOR = '#0d6efd'; // Bootstrap primary blue
-const PLOTLY_BAR_COLOR_ALT = '#6f42c1'; // Bootstrap purple (example for the second sector chart)
-const PLOTLY_CONFIG = { responsive: true, displayModeBar: false };
-const PLOTLY_LAYOUT_DEFAULTS = {
-  margin: { l: 60, r: 20, t: 10, b: 120 }, // Adjusted for rotated labels
-  yaxis: { title: 'Number of Outbreaks', tickformat: ',', gridcolor: 'rgba(0,0,0,.1)', fixedrange: true },
-  xaxis: { tickangle: -45, automargin: true, fixedrange: true }, // Rotate labels for readability
-  hoverlabel: { bgcolor: "#FFF", font: { size: 12 } },
-  paper_bgcolor: 'rgba(0,0,0,0)', // Transparent background
-  plot_bgcolor: 'rgba(0,0,0,0)'   // Transparent background
+const BAR_COLOR_PRIMARY = '#0d6efd';
+const BAR_COLOR_ALT     = '#6f42c1';
+const PLOTLY_CFG = {responsive:true,displayModeBar:false};
+const PLOTLY_LAYOUT_BASE = {
+  margin:{l:60,r:20,t:10,b:120},
+  yaxis:{title:'Number of Outbreaks',tickformat:',',gridcolor:'rgba(0,0,0,.1)',fixedrange:true},
+  xaxis:{tickangle:-45,automargin:true,fixedrange:true},
+  hoverlabel:{bgcolor:'#FFF',font:{size:12}},
+  paper_bgcolor:'rgba(0,0,0,0)',
+  plot_bgcolor:'rgba(0,0,0,0)'
 };
 
-/*--------------------------------------------------------------
-  Initialization – Load CSV & Build Dashboard
---------------------------------------------------------------*/
-document.addEventListener('DOMContentLoaded', () => {
-  Papa.parse(CSV_PATH, {
-    download: true,      // Crucial for fetching the file
-    header: true,        // Use first row as header keys
-    dynamicTyping: true, // Automatically convert numbers
-    skipEmptyLines: true,
-    complete: ({ data, errors, meta }) => {
-      if (errors.length > 0) {
-        console.error('CSV Parsing Errors:', errors);
-        handleLoadError(new Error(`Parsing errors encountered in ${CSV_PATH}. Check console.`));
-        // Optionally try to build with partial data if appropriate
-        // buildDashboard(data);
-      } else if (!data || data.length === 0) {
-        handleLoadError(new Error(`No data found in ${CSV_PATH}. Is the file empty or incorrect?`));
-      } else {
-        console.log('CSV Loaded Successfully:', meta);
-        buildDashboard(data);
-      }
+/* -------------------------------------------------------------
+   Initialization
+----------------------------------------------------------------*/
+document.addEventListener('DOMContentLoaded',() => {
+  Papa.parse(CSV_PATH,{
+    download:true,header:true,dynamicTyping:true,skipEmptyLines:true,
+    complete:({data,errors,meta}) => {
+      if(errors.length){return onError(new Error('CSV parse errors'));}
+      if(!data.length){return onError(new Error('CSV empty'));}
+      buildDashboard(data);
     },
-    error: (err) => handleLoadError(err) // Handle network/fetch errors
+    error:onError
   });
 });
+function onError(err){console.error(err);alert('Failed to load data: '+err.message);}
 
-/*--------------------------------------------------------------
-  Error Handler
---------------------------------------------------------------*/
-function handleLoadError(error) {
-  console.error('Error loading or parsing CSV:', error);
-  const kpiRow = document.getElementById('kpiRow');
-  if (kpiRow) {
-    kpiRow.innerHTML = `<div class="col-12"><div class="alert alert-danger" role="alert">
-      <strong>Error:</strong> Unable to load or parse the CSV data (${CSV_PATH}).<br>
-      ${error.message}<br>
-      <em>Possible reasons:</em>
-      <ul>
-        <li>The file '${CSV_PATH}' is not in the same folder as this HTML file.</li>
-        <li>The file is named incorrectly or is corrupted.</li>
-        <li>Browser security restrictions are blocking the request (try using a simple local web server like Python's \`http.server\` or Node's \`http-server\` instead of opening the HTML file directly via \`file://\`).</li>
-      </ul>
-      Check the browser's developer console (F12) for more technical details.
-      </div></div>`;
-  } else {
-    // Fallback if the kpiRow isn't found for some reason
-    alert(`Error loading CSV: ${error.message}. Check console (F12) and file location.`);
-  }
-  // Optionally hide chart/table areas
-  document.querySelectorAll('.chart-wrapper, .table-responsive').forEach(el => el.style.display = 'none');
+/* -------------------------------------------------------------
+   Dashboard Builder
+----------------------------------------------------------------*/
+function buildDashboard(rows){
+  renderKpiCards(rows);
+  plotSectorOutbreaks(rows);
+  plotSectorCases(rows);
+  plotSettingOutbreaks(rows);
+  plotSettingCases(rows);
+  populateTable(rows);
 }
 
+/* ── Helpers ──────────────────────────────────────────────── */
+const aggregateTop = (arr,groupKey,sumKey,n,filter=() => true) => Object.entries(
+  arr.filter(filter).reduce((a,r)=>{const k=r[groupKey];const v=+r[sumKey]||0;if(k)a[k]=(a[k]||0)+v;return a;},{}))
+  .sort(([,a],[,b])=>b-a).slice(0,n);
 
-/*--------------------------------------------------------------
-  Dashboard Builder Functions
---------------------------------------------------------------*/
-function buildDashboard(rows) {
-  try {
-    updateKpiCards(rows);
-    createTopSectorsChart(rows);
-    createCasesBySectorChart(rows); // <-- Add call for the new chart
-    createTopSettingsChart(rows);
-    createTopSettingsCasesChart(rows); // <-- Add call for the new settings cases chart
-    populateDataTable(rows);
-  } catch (error) {
-    console.error("Error building dashboard components:", error);
-    alert(`An error occurred while building the dashboard: ${error.message}. Check the console.`);
-  }
-}
-
-/* ── KPI Cards ───────────────────────────────────────────── */
-function updateKpiCards(rows) {
-  const sum = (arr, key) => arr.reduce((total, row) => total + (Number(row[key]) || 0), 0);
-  const countUnique = (arr, key) => new Set(arr.map(row => row[key])).size;
-  const kpiRow = document.getElementById('kpiRow');
-
-  // --- Calculate outbreaks per year ---
-  const outbreaksByYear = rows.reduce((acc, row) => {
-    const year = row.Year;
-    const outbreaks = Number(row.Outbreaks) || 0;
-    // Ensure year is a valid number (or string representation of one)
-    if (year !== null && year !== undefined && year !== '' && !isNaN(year)) {
-      acc[year] = (acc[year] || 0) + outbreaks;
-    }
-    return acc;
-  }, {});
-
-  const sortedYears = Object.keys(outbreaksByYear).sort((a, b) => Number(a) - Number(b));
-
-  // --- Generate Year Cards HTML ---
-  let yearCardsHtml = '';
-  sortedYears.forEach(year => {
-    // Use flexible columns that wrap nicely
-    yearCardsHtml += `
-      <div class="col-6 col-lg-auto mb-3">
-        <div class="card kpi-card text-center h-100">
-          <div class="card-body d-flex flex-column justify-content-center">
-            <h6>Outbreaks ${year}</h6>
-            <div class="kpi-value">${(outbreaksByYear[year] || 0).toLocaleString()}</div>
-          </div>
-        </div>
-      </div>`;
-  });
-
-  // --- Update remaining static KPIs ---
-  document.getElementById('kpiCases').textContent = sum(rows, 'Cases').toLocaleString() || '0';
-  document.getElementById('kpiSectors').textContent = countUnique(rows, 'IndustrySector').toLocaleString() || '0';
-  document.getElementById('kpiSettings').textContent = countUnique(rows, 'IndividualSetting').toLocaleString() || '0';
-
-  // --- Update the DOM ---
-  // Insert the generated year cards at the beginning of the row
-  kpiRow.insertAdjacentHTML('afterbegin', yearCardsHtml);
-
-  // Adjust classes for the remaining static cards for better alignment/wrapping
-  // This assumes the static cards for Cases, Sectors, Settings are still present in the HTML
-  kpiRow.querySelectorAll('.col-6.col-md-3').forEach(col => {
-      col.classList.remove('col-md-3');
-      col.classList.add('col-lg-auto', 'mb-3'); // Match dynamic card classes
+/* ── KPI CARDS ─────────────────────────────────────────────── */
+function renderKpiCards(rows){
+  const wrap=document.getElementById('kpiRow');wrap.innerHTML='';
+  const outbreaksByYear=rows.reduce((a,r)=>{const y=r.Year;const v=+r.Outbreaks||0;if(y)a[y]=(a[y]||0)+v;return a;},{});
+  const years=Object.keys(outbreaksByYear).sort();
+  const totalCases=rows.reduce((t,r)=>t+(+r.Cases||0),0);
+  const sectors=new Set(rows.map(r=>r.IndustrySector).filter(Boolean)).size;
+  const settings=new Set(rows.map(r=>r.IndividualSetting).filter(Boolean)).size;
+  const kpis=[...years.map(y=>({label:`OUTBREAKS ${y}`,value:outbreaksByYear[y]})),
+              {label:'TOTAL CASES',value:totalCases},
+              {label:'INDUSTRY SECTORS',value:sectors},
+              {label:'INDIVIDUAL SETTINGS',value:settings}];
+  const palette=['bg-indigo','bg-teal','bg-amber','bg-emerald','bg-coral','bg-violet','bg-sky','bg-slate'];
+  kpis.forEach((k,i)=>{
+    wrap.insertAdjacentHTML('beforeend',`
+      <div class="kpi-card ${palette[i%palette.length]}">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${(+k.value||0).toLocaleString()}</div>
+      </div>`);
   });
 }
 
-/* ── Data Aggregation Helper ─────────────────────────────── */
-function aggregateAndGetTopN(data, groupByKey, sumByKey, n, filterFn = () => true) {
-  const aggregation = data
-    .filter(filterFn) // Apply custom filter first
-    .reduce((acc, row) => {
-      const key = row[groupByKey];
-      const value = Number(row[sumByKey]) || 0;
-      if (key) { // Ensure the key exists
-        acc[key] = (acc[key] || 0) + value;
-      }
-      return acc;
-    }, {});
-
-  return Object.entries(aggregation)
-    .sort(([, valueA], [, valueB]) => valueB - valueA) // Sort descending by value
-    .slice(0, n); // Take top N
+/* ── Charts ──────────────────────────────────────────────── */
+function plotSectorOutbreaks(rows){
+  const data=aggregateTop(rows,'IndustrySector','Outbreaks',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));
+  Plotly.newPlot('sectorChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_COLOR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],PLOTLY_LAYOUT_BASE,PLOTLY_CFG);
+}
+function plotSectorCases(rows){
+  const data=aggregateTop(rows,'IndustrySector','Cases',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));
+  const layout={...PLOTLY_LAYOUT_BASE,yaxis:{...PLOTLY_LAYOUT_BASE.yaxis,title:'Total Cases'}};
+  Plotly.newPlot('sectorCasesChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_COLOR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],layout,PLOTLY_CFG);
+}
+function plotSettingOutbreaks(rows){
+  const data=aggregateTop(rows,'IndividualSetting','Outbreaks',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));
+  Plotly.newPlot('settingChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_COLOR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],PLOTLY_LAYOUT_BASE,PLOTLY_CFG);
+}
+function plotSettingCases(rows){
+  const data=aggregateTop(rows,'IndividualSetting','Cases',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));
+  const layout={...PLOTLY_LAYOUT_BASE,yaxis:{...PLOTLY_LAYOUT_BASE.yaxis,title:'Total Cases'}};
+  Plotly.newPlot('settingCasesChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_COLOR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],layout,PLOTLY_CFG);
 }
 
-/* ── Top 10 Industry Sectors Chart ──────────────────────── */
-function createTopSectorsChart(rows) {
-  // Filter out rows where IndustrySector is likely a total/summary
-  const excludeSummarySectors = (row) => {
-    const sector = (row.IndustrySector || '').toString().toLowerCase().trim();
-    return !['total', ''].includes(sector); // Exclude "Total" and empty sectors
-  };
-
-  const topSectors = aggregateAndGetTopN(rows, 'IndustrySector', 'Outbreaks', Infinity, excludeSummarySectors); // Get all, filtered
-
-  const plotData = [{
-    type: 'bar',
-    x: topSectors.map(([sector]) => sector),
-    y: topSectors.map(([, outbreaks]) => outbreaks),
-    marker: { color: PLOTLY_BAR_COLOR },
-    hovertemplate: '%{x}: %{y:,} outbreaks<extra></extra>' // Custom hover text
-  }];
-
-  const layout = { ...PLOTLY_LAYOUT_DEFAULTS }; // Clone defaults
-
-  Plotly.newPlot('sectorChart', plotData, layout, PLOTLY_CONFIG);
+/* ── DataTable ────────────────────────────────────────────── */
+function populateTable(rows){
+  if($.fn.DataTable.isDataTable('#dataTable')){$('#dataTable').DataTable().destroy();$('#dataTable tbody').empty();}
+  const tb=document.querySelector('#dataTable tbody');
+  rows.forEach(r=>{tb.insertAdjacentHTML('beforeend',`<tr><td>${r.Year??''}</td><td>${r.IndustrySector??''}</td><td>${r.IndividualSetting??''}</td><td>${r.IndCode??''}</td><td>${(+r.Outbreaks||0).toLocaleString()}</td><td>${(+r.Cases||0).toLocaleString()}</td></tr>`);});
+  $('#dataTable').DataTable({pageLength:10,lengthMenu:[10,25,50,100],order:[[4,'desc']],responsive:true,dom:'<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',language:{search:"_INPUT_",searchPlaceholder:"Search table..."}});
 }
-
-/* ── Industry Sectors by Cases Chart ────────────────────── */
-function createCasesBySectorChart(rows) {
-  // Use the same filter as the outbreaks chart
-  const excludeSummarySectors = (row) => {
-    const sector = (row.IndustrySector || '').toString().toLowerCase().trim();
-    return !['total', ''].includes(sector); // Exclude "Total" and empty sectors
-  };
-
-  // Aggregate by 'IndustrySector' but sum 'Cases' this time
-  const casesBySector = aggregateAndGetTopN(rows, 'IndustrySector', 'Cases', Infinity, excludeSummarySectors); // Get all, filtered
-
-  const plotData = [{
-    type: 'bar',
-    x: casesBySector.map(([sector]) => sector),
-    y: casesBySector.map(([, cases]) => cases), // Use cases for y-axis
-    marker: { color: PLOTLY_BAR_COLOR_ALT }, // Use the alternate color
-    hovertemplate: '%{x}: %{y:,} cases<extra></extra>' // Update hover text
-  }];
-
-  const layout = { ...PLOTLY_LAYOUT_DEFAULTS, yaxis: { ...PLOTLY_LAYOUT_DEFAULTS.yaxis, title: 'Total Cases' } }; // Clone defaults and update y-axis title
-  Plotly.newPlot('sectorCasesChart', plotData, layout, PLOTLY_CONFIG);
-}
-
-/* ── Top 10 Individual Settings Chart ───────────────────── */
-function createTopSettingsChart(rows) {
-  // Filter out rows where IndividualSetting is likely a total/summary
-  const excludeSummarySettings = (row) => {
-    const setting = (row.IndividualSetting || '').toString().toLowerCase().trim();
-    return !['total', 'all settings', 'all setting', 'all', ''].includes(setting);
-  };
-
-  const topSettings = aggregateAndGetTopN(rows, 'IndividualSetting', 'Outbreaks', 10, excludeSummarySettings);
-
-  const plotData = [{
-    type: 'bar',
-    x: topSettings.map(([setting]) => setting),
-    y: topSettings.map(([, outbreaks]) => outbreaks),
-    marker: { color: PLOTLY_BAR_COLOR },
-    hovertemplate: '%{x}: %{y:,} outbreaks<extra></extra>'
-  }];
-
-  const layout = { ...PLOTLY_LAYOUT_DEFAULTS }; // Clone defaults
-
-  Plotly.newPlot('settingChart', plotData, layout, PLOTLY_CONFIG);
-}
-
-/* ── Top 10 Individual Settings by Cases Chart ──────────── */
-function createTopSettingsCasesChart(rows) {
-  // Use the same filter as the outbreaks chart
-  const excludeSummarySettings = (row) => {
-    const setting = (row.IndividualSetting || '').toString().toLowerCase().trim();
-    return !['total', 'all settings', 'all setting', 'all', ''].includes(setting);
-  };
-
-  // Aggregate by 'IndividualSetting' but sum 'Cases' this time, take top 10
-  const topSettingsCases = aggregateAndGetTopN(rows, 'IndividualSetting', 'Cases', 10, excludeSummarySettings);
-
-  const plotData = [{
-    type: 'bar',
-    x: topSettingsCases.map(([setting]) => setting),
-    y: topSettingsCases.map(([, cases]) => cases), // Use cases for y-axis
-    marker: { color: PLOTLY_BAR_COLOR },
-    hovertemplate: '%{x}: %{y:,} cases<extra></extra>' // Update hover text
-  }];
-
-  const layout = { ...PLOTLY_LAYOUT_DEFAULTS, yaxis: { ...PLOTLY_LAYOUT_DEFAULTS.yaxis, title: 'Total Cases' } }; // Clone defaults and update y-axis title
-  Plotly.newPlot('settingCasesChart', plotData, layout, PLOTLY_CONFIG);
-}
-
-/* ── Data Table Population ──────────────────────────────── */
-function populateDataTable(rows) {
-  // Clear previous data if rebuilding
-  if ($.fn.DataTable.isDataTable('#dataTable')) {
-    $('#dataTable').DataTable().destroy();
-    $('#dataTable tbody').empty(); // Clear the table body
-  }
-
-  const tableBody = document.querySelector('#dataTable tbody');
-  rows.forEach(row => {
-    const tr = tableBody.insertRow();
-    tr.innerHTML = `
-      <td>${row.Year ?? ''}</td>
-      <td>${row.IndustrySector ?? ''}</td>
-      <td>${row.IndividualSetting ?? ''}</td>
-      <td>${row.IndCode ?? ''}</td>
-      <td>${(Number(row.Outbreaks) || 0).toLocaleString()}</td>
-      <td>${(Number(row.Cases) || 0).toLocaleString()}</td>
-    `;
-  });
-
-  // Initialize DataTables
-  $('#dataTable').DataTable({
-    pageLength: 10,             // Default number of rows per page
-    lengthMenu: [10, 25, 50, 100], // Options for rows per page
-    order: [[4, 'desc']],       // Default sort by 'Outbreaks' descending
-    responsive: true,           // Enable responsive behavior
-    // Customize layout: f=filtering, l=length changing, t=table, i=info, p=pagination
-    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-         '<"row"<"col-sm-12"tr>>' +
-         '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-    language: {
-        search: "_INPUT_", // Use placeholder for search input
-        searchPlaceholder: "Search table..."
-    }
-  });
-}
-
 </script>
 </body>
 </html>
