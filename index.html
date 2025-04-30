@@ -3,28 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>US COVID-19 Workplace Outbreaks – 2021 Dashboard</title>
+  <title>COVID-19 Workplace Outbreaks (USA 2021)</title>
 
-  <!-- Bootstrap for quick, responsive layout -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-  >
-  <!-- DataTables for the full interactive table -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css"
-  >
+  <!-- ===== CSS libraries ===== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
   <style>
-    body { background:#f7f9fc }
-    .card { border:none; box-shadow:0 2px 8px rgba(0,0,0,.05) }
-    .metric { font-size:2.2rem;font-weight:600 }
+    body        { background:#f7f9fc; }
+    .card       { border:none; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .metric     { font-size:2.2rem; font-weight:600; }
+    footer      { font-size:.825rem; color:#768; }
   </style>
 </head>
 <body class="p-3">
 
 <div class="container-fluid">
-  <h1 class="mb-4 fw-bold text-center">COVID-19 Workplace Outbreaks (USA, 2021)</h1>
+  <h1 class="fw-bold text-center mb-4">COVID-19 Workplace Outbreaks (USA, 2021)</h1>
 
   <!-- KPI cards -->
   <div class="row g-3 mb-4" id="kpiRow"></div>
@@ -45,14 +40,19 @@
     </div>
   </div>
 
-  <!-- Full dataset table -->
+  <!-- Full Data Table -->
   <div class="card p-3 mt-4">
-    <h5 class="card-title">Explore the Full Dataset (filter & search)</h5>
+    <h5 class="card-title">Explore the Full Dataset&nbsp;<small class="text-muted">(filter &amp; search)</small></h5>
     <table id="dataTable" class="table table-striped" style="width:100%"></table>
   </div>
+
+  <footer class="text-center mt-4">
+    Interactive dashboard – built with Bootstrap 5, Plotly 2, Papa Parse&nbsp;5 and DataTables 1.<br>
+    Hosted free on GitHub Pages.
+  </footer>
 </div>
 
-<!-- JS libraries -->
+<!-- ===== JS libraries (load last for faster paint) ===== -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.3/papaparse.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -60,90 +60,99 @@
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-/* ========= 1. Load the CSV (must live in the same repo) ========= */
-Papa.parse('covid-19outbreakstotal2021byindustry_02apr25.csv', {
+/* ------------------------------------------------------------------
+   1.  LOAD THE CSV
+   ------------------------------------------------------------------
+   - If the CSV lives somewhere else, just update the path below.
+   - Prefer relative paths to keep the repo portable.
+-------------------------------------------------------------------*/
+Papa.parse('covid-19outbreakstotal2021byindustry_02apr25.csv', { // <-- change path if needed
   download: true,
-  header: true,
-  complete: function(results) {
-    const data = results.data;
-    buildDashboard(data);
-  }
+  header  : true,
+  skipEmptyLines: true,
+  complete: res => buildDashboard(res.data),
+  error   : err => alert('❌ Could not load the CSV file:\n' + err)
 });
 
-/* ========= 2. Dashboard logic ========= */
+/* ------------------------------------------------------------------
+   2.  BUILD DASHBOARD
+-------------------------------------------------------------------*/
 function buildDashboard(data) {
-  // Helper to coerce numbers
-  data.forEach(d=>{
-    d.Cases = +d.Cases;
-    d.Outbreaks = +d.Outbreaks;
+
+  /* --- tidy numbers --- */
+  data.forEach(d => {
+    d.Outbreaks = +d.Outbreaks || 0;
+    d.Cases     = +d.Cases     || 0;
   });
 
-  /* ----- KPI cards ----- */
-  const totalOutbreaks = d3sum(data,'Outbreaks');
-  const totalCases     = d3sum(data,'Cases');
-  const distinctSectors = new Set(data.map(d=>d.IndustrySector)).size;
-  const distinctSettings= new Set(data.map(d=>d.IndividualSetting)).size;
-  const KPIs = [
-    {label:'Total Outbreaks',value:totalOutbreaks.toLocaleString()},
-    {label:'Total Confirmed Cases',value:totalCases.toLocaleString()},
-    {label:'Industry Sectors',value:distinctSectors},
-    {label:'Individual Settings',value:distinctSettings}
-  ];
-  document.getElementById('kpiRow').innerHTML = KPIs.map(k=>`
-    <div class="col-6 col-lg-3">
-      <div class="card text-center p-3">
-        <div class="metric">${k.value}</div>
-        <small class="text-muted">${k.label}</small>
-      </div>
-    </div>`).join('');
+  /* ---------- KPI cards ---------- */
+  const totalOutbreaks = sum(data,'Outbreaks');
+  const totalCases     = sum(data,'Cases');
+  const sectors        = new Set(data.map(d => d.IndustrySector)).size;
+  const settings       = new Set(data.map(d => d.IndividualSetting)).size;
 
-  /* ----- Aggregations ----- */
-  const bySector  = rollupSum(data,'IndustrySector');
-  const bySetting = rollupSum(data,'IndividualSetting')
-                      .filter(d=>!['Total','All Settings'].includes(d.name));
+  const kpiHTML = [
+    {label:'Total Outbreaks', value:fmt(totalOutbreaks)},
+    {label:'Total Confirmed Cases', value:fmt(totalCases)},
+    {label:'Industry Sectors', value:sectors},
+    {label:'Individual Settings', value:settings}
+  ].map(k => `
+      <div class="col-6 col-lg-3">
+        <div class="card text-center p-3">
+          <div class="metric">${k.value}</div>
+          <small class="text-muted">${k.label}</small>
+        </div>
+      </div>`).join('');
+  document.getElementById('kpiRow').innerHTML = kpiHTML;
 
-  const topSector  = bySector  .slice(0,10);
-  const topSetting = bySetting .slice(0,10);
+  /* ---------- Aggregations ---------- */
+  const bySector  = rollup(data,'IndustrySector').slice(0,10);
+  const bySetting = rollup(data,'IndividualSetting')
+                      .filter(d => !['Total','All Settings'].includes(d.name))
+                      .slice(0,10);
 
-  /* ----- Bar Charts ----- */
-  makeBar('sectorChart', topSector, 'Industry Sector');
-  makeBar('settingChart', topSetting, 'Individual Setting');
+  /* ---------- Bar charts ---------- */
+  makeBar('sectorChart',  bySector,  'Industry Sector');
+  makeBar('settingChart', bySetting, 'Individual Setting');
 
-  /* ----- Full DataTable ----- */
+  /* ---------- Interactive table ---------- */
   $('#dataTable').DataTable({
     data,
-    columns: Object.keys(data[0]).map(k=>({title:k,data:k})),
-    pageLength: 15,
-    responsive: true
+    columns: Object.keys(data[0]).map(col => ({title:col,data:col})),
+    pageLength:15,
+    responsive:true
   });
 }
 
-/* ========= 3. Helpers ========= */
-function rollupSum(data, field){
+/* ------------------------------------------------------------------
+   3.  HELPER FUNCTIONS
+-------------------------------------------------------------------*/
+function rollup(arr, key){
   const map = {};
-  data.forEach(d=>{
-    const key = d[field] || 'Unknown';
-    map[key] = (map[key]||0) + d.Outbreaks;
+  arr.forEach(d => {
+    const k = d[key] || 'Unknown';
+    map[k]  = (map[k] || 0) + d.Outbreaks;
   });
-  return Object.entries(map).map(([name,val])=>({name,val}))
-          .sort((a,b)=>b.val - a.val);
+  return Object.entries(map)
+               .map(([name,val]) => ({name, val}))
+               .sort((a,b) => b.val - a.val);
 }
-function makeBar(divId, arr, xLabel){
-  Plotly.newPlot(divId, [{
-    x: arr.map(d=>d.name),
-    y: arr.map(d=>d.val),
+function makeBar(div, data, xlabel){
+  Plotly.newPlot(div, [{
+    x:  data.map(d => d.name),
+    y:  data.map(d => d.val),
     type:'bar',
-    text: arr.map(d=>d.val.toLocaleString()),
+    text: data.map(d => fmt(d.val)),
     textposition:'auto'
   }], {
     margin:{t:30,b:120},
-    xaxis:{title:xLabel, tickangle:-40},
-    yaxis:{title:'Outbreaks'},
+    xaxis:{title:xlabel, tickangle:-40},
+    yaxis:{title:'Number of Outbreaks'},
     height:480
   }, {responsive:true});
 }
-// small utility for sum
-function d3sum(arr,field){ return arr.reduce((acc,x)=>acc+(+x[field]||0),0); }
+function sum(arr, field){ return arr.reduce((s,d)=>s + (+d[field]||0), 0); }
+function fmt(num){ return (+num).toLocaleString(); }
 </script>
 </body>
 </html>
