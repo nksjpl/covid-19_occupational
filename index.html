@@ -18,97 +18,40 @@
 
   <style>
     /* ─── Base ─────────────────────────────────────────────── */
-    :root{
-      --clr-bg:#f1f5f9;               /* slate‑100 */
-      --clr-surface:#ffffff;          /* white */
-      --clr-border:#e2e8f0;           /* slate‑200 */
-      --clr-text-primary:#0f172a;     /* slate‑900 */
-      --clr-text-muted:#475569;       /* slate‑600 */
-    }
+    :root{--clr-bg:#f1f5f9;--clr-surface:#ffffff;--clr-border:#e2e8f0;--clr-text-primary:#0f172a;--clr-text-muted:#475569}
     *,*::before,*::after{box-sizing:border-box}
-    body{
-      background:var(--clr-bg);
-      font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-      color:var(--clr-text-primary);
-    }
-
-    /* ─── Header ───────────────────────────────────────────── */
-    .dashboard-header{
-      background:#4f46e5;             /* indigo‑600 */
-      color:#fff;
-      padding:1rem 2rem;
-      box-shadow:0 2px 8px rgba(0,0,0,.08);
-    }
-    .dashboard-header h1{
-      font-size:1.5rem;
-      font-weight:600;
-      margin:0;
-      letter-spacing:-.02em;
-    }
-
-    /* ─── KPI Row ──────────────────────────────────────────── */
-    #kpiRow{
-      display:flex;
-      flex-wrap:nowrap;
-      gap:1rem;
-      overflow-x:auto;
-      padding-bottom:.5rem;
-      scrollbar-width:thin;
-    }
-    #kpiRow::-webkit-scrollbar{height:.5rem}
-    #kpiRow::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:.25rem}
-
-    .kpi-card{
-      min-width:200px;
-      border-radius:.75rem;
-      box-shadow:0 4px 12px rgba(0,0,0,.08);
-      padding:1.25rem 1.5rem;
-      color:#fff;
-      transition:transform .2s ease,box-shadow .2s ease;
-    }
+    body{background:var(--clr-bg);font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--clr-text-primary)}
+    /* Header */
+    .dashboard-header{background:#4f46e5;color:#fff;padding:1rem 2rem;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .dashboard-header h1{font-size:1.5rem;font-weight:600;letter-spacing:-.02em;margin:0}
+    /* KPI Row */
+    #kpiRow{display:flex;flex-wrap:nowrap;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:thin}
+    #kpiRow::-webkit-scrollbar{height:.5rem}#kpiRow::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:.25rem}
+    .kpi-card{min-width:200px;border-radius:.75rem;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:1.25rem 1.5rem;color:#fff;transition:transform .2s,box-shadow .2s}
     .kpi-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
     .kpi-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;opacity:.9;margin-bottom:.25rem;white-space:nowrap}
     .kpi-value{font-size:2rem;font-weight:700;line-height:1.1}
-
-    /* palette */
     .bg-indigo{background:#4f46e5}.bg-teal{background:#14b8a6}.bg-amber{background:#f59e0b}.bg-emerald{background:#10b981}.bg-coral{background:#ff7f50}.bg-violet{background:#8b5cf6}.bg-sky{background:#38bdf8}.bg-slate{background:#64748b}
-
-    /* ─── Cards / Tables / Charts ─────────────────────────── */
-    .surface{
-      background:var(--clr-surface);
-      border:1px solid var(--clr-border);
-      border-radius:.75rem;
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
-      padding:1rem;
-    }
+    /* Surfaces */
+    .surface{background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:.75rem;box-shadow:0 2px 6px rgba(0,0,0,.05);padding:1rem}
     .surface h6{color:var(--clr-text-muted);font-weight:600}
 
-    /* Make sector charts sit side‑by‑side evenly */
-    .sector-row{display:flex;flex-direction:column;gap:1rem}
-    @media (min-width:992px){ /* lg */
-      .sector-row{flex-direction:row}
-      .sector-row .chart-wrapper{flex:1 1 50%}
-    }
+    /* Dual‑chart row helper (sector + settings) */
+    .dual-row{display:flex;flex-direction:column;gap:1rem}
+    @media (min-width:992px){.dual-row{flex-direction:row}.dual-row .chart-wrapper{flex:1 1 50%}}
 
-    /* Balance chart heights */
     .chart-wrapper{min-height:420px;display:flex;flex-direction:column}
-    .chart-wrapper > div[id$="Chart"]{flex:1}
-
+    .chart-wrapper>div[id$="Chart"]{flex:1}
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="dashboard-header mb-4">
-    <h1>COVID‑19 Outbreaks Dashboard</h1>
-  </header>
-
+  <header class="dashboard-header mb-4"><h1>COVID‑19 Outbreaks Dashboard</h1></header>
   <main class="container-fluid">
-
     <!-- KPI ROW -->
     <section id="kpiRow" class="mb-5"></section>
 
     <!-- SECTOR CHARTS ROW -->
-    <section class="sector-row mb-4">
+    <section class="dual-row mb-4">
       <div class="chart-wrapper surface">
         <h6 class="text-center mb-3">Industry Sectors by Outbreaks (Excl. Total)</h6>
         <div id="sectorChart" role="img" aria-label="Bar chart showing the industry sectors with the most COVID‑19 outbreaks"></div>
@@ -119,41 +62,27 @@
       </div>
     </section>
 
-    <!-- SETTINGS CHARTS ROW -->
-    <div class="row gy-4 mb-4">
-      <div class="col-12 col-lg-6">
-        <div class="chart-wrapper surface h-100">
-          <h6 class="text-center mb-3">Top 10 Individual Settings by Outbreaks</h6>
-          <div id="settingChart" role="img" aria-label="Bar chart showing settings with the most outbreaks"></div>
-        </div>
+    <!-- SETTINGS CHARTS ROW (now side‑by‑side like sector charts) -->
+    <section class="dual-row mb-4">
+      <div class="chart-wrapper surface">
+        <h6 class="text-center mb-3">Top 10 Individual Settings by Outbreaks</h6>
+        <div id="settingChart" role="img" aria-label="Bar chart showing settings with the most outbreaks"></div>
       </div>
-      <div class="col-12 col-lg-6">
-        <div class="chart-wrapper surface h-100">
-          <h6 class="text-center mb-3">Top 10 Individual Settings by Total Cases</h6>
-          <div id="settingCasesChart" role="img" aria-label="Bar chart showing settings with the most cases"></div>
-        </div>
+      <div class="chart-wrapper surface">
+        <h6 class="text-center mb-3">Top 10 Individual Settings by Total Cases</h6>
+        <div id="settingCasesChart" role="img" aria-label="Bar chart showing settings with the most cases"></div>
       </div>
-    </div>
+    </section>
 
     <!-- DATA TABLE -->
     <section class="surface mb-5">
       <div class="table-responsive">
         <table id="dataTable" class="display nowrap" style="width:100%">
-          <thead class="table-light">
-            <tr>
-              <th>Year</th>
-              <th>Industry Sector</th>
-              <th>Individual Setting</th>
-              <th>Ind Code</th>
-              <th>Outbreaks</th>
-              <th>Cases</th>
-            </tr>
-          </thead>
+          <thead class="table-light"><tr><th>Year</th><th>Industry Sector</th><th>Individual Setting</th><th>Ind Code</th><th>Outbreaks</th><th>Cases</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
-
   </main>
 
   <!-- SCRIPTS -->
@@ -162,92 +91,18 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
-
   <script>
-  /* -----------------------------------------------------------
-     Configuration & Globals
-  -----------------------------------------------------------*/
-  const CSV_PATH = 'covid-19occu.csv';
-  const BAR_PRIMARY = '#0d6efd';
-  const BAR_ALT     = '#6f42c1';
-  const PLOT_CFG = {responsive:true,displayModeBar:false};
-  const BASE_LAYOUT = {
-    margin:{l:60,r:20,t:10,b:120},
-    yaxis:{title:'Number of Outbreaks',tickformat:',',gridcolor:'rgba(0,0,0,.1)',fixedrange:true},
-    xaxis:{tickangle:-45,automargin:true,fixedrange:true},
-    hoverlabel:{bgcolor:'#fff',font:{size:12}},
-    paper_bgcolor:'rgba(0,0,0,0)',
-    plot_bgcolor:'rgba(0,0,0,0)'
-  };
-
-  /* -----------------------------------------------------------
-     Load CSV & Kick off
-  -----------------------------------------------------------*/
-  document.addEventListener('DOMContentLoaded',() => {
-    Papa.parse(CSV_PATH,{
-      download:true,header:true,dynamicTyping:true,skipEmptyLines:true,
-      complete:({data,errors}) => errors.length ? onError('Parse Error') : buildDashboard(data),
-      error:err => onError(err.message)
-    });
-  });
-
-  function onError(msg){console.error(msg);alert('Error: '+msg);}  
-
-  /* -----------------------------------------------------------
-     Dashboard Builder
-  -----------------------------------------------------------*/
-  function buildDashboard(rows){
-    renderKpis(rows);
-    plotSectorOutbreaks(rows);
-    plotSectorCases(rows);
-    plotSettingOutbreaks(rows);
-    plotSettingCases(rows);
-    populateTable(rows);
-  }
-
-  /* ── Utilities ─────────────────────────────────────────── */
-  const aggregateTop = (arr,key,sum,n,filter=()=>true) => Object.entries(arr.filter(filter).reduce((a,r)=>{const k=r[key];const v=+r[sum]||0;if(k)a[k]=(a[k]||0)+v;return a;},{})).sort(([,a],[,b])=>b-a).slice(0,n);
-
-  /* ── KPI Cards ─────────────────────────────────────────── */
-  function renderKpis(rows){
-    const wrap=document.getElementById('kpiRow');wrap.innerHTML='';
-    const outbreaksByYear=rows.reduce((a,r)=>{const y=r.Year;const v=+r.Outbreaks||0;if(y)a[y]=(a[y]||0)+v;return a;},{});
-    const years=Object.keys(outbreaksByYear).sort();
-    const totalCases=rows.reduce((t,r)=>t+(+r.Cases||0),0);
-    const sectors=new Set(rows.map(r=>r.IndustrySector).filter(Boolean)).size;
-    const settings=new Set(rows.map(r=>r.IndividualSetting).filter(Boolean)).size;
-    const kpis=[...years.map(y=>({label:`OUTBREAKS ${y}`,value:outbreaksByYear[y]})),{label:'TOTAL CASES',value:totalCases},{label:'INDUSTRY SECTORS',value:sectors},{label:'INDIVIDUAL SETTINGS',value:settings}];
-    const palette=['bg-indigo','bg-teal','bg-amber','bg-emerald','bg-coral','bg-violet','bg-sky','bg-slate'];
-    kpis.forEach((k,i)=>wrap.insertAdjacentHTML('beforeend',`<div class="kpi-card ${palette[i%palette.length]}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${(+k.value||0).toLocaleString()}</div></div>`));
-  }
-
-  /* ── Charts ───────────────────────────────────────────── */
-  function plotSectorOutbreaks(rows){
-    const data=aggregateTop(rows,'IndustrySector','Outbreaks',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));
-    Plotly.newPlot('sectorChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],BASE_LAYOUT,PLOT_CFG);
-  }
-  function plotSectorCases(rows){
-    const data=aggregateTop(rows,'IndustrySector','Cases',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));
-    const layout={...BASE_LAYOUT,yaxis:{...BASE_LAYOUT.yaxis,title:'Total Cases'}};
-    Plotly.newPlot('sectorCasesChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],layout,PLOT_CFG);
-  }
-  function plotSettingOutbreaks(rows){
-    const data=aggregateTop(rows,'IndividualSetting','Outbreaks',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));
-    Plotly.newPlot('settingChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],BASE_LAYOUT,PLOT_CFG);
-  }
-  function plotSettingCases(rows){
-    const data=aggregateTop(rows,'IndividualSetting','Cases',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));
-    const layout={...BASE_LAYOUT,yaxis:{...BASE_LAYOUT.yaxis,title:'Total Cases'}};
-    Plotly.newPlot('settingCasesChart',[{type:'bar',x:data.map(d=>d[0]),y:data.map(d=>d[1]),marker:{color:BAR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],layout,PLOT_CFG);
-  }
-
-  /* ── Data Table ───────────────────────────────────────── */
-  function populateTable(rows){
-    if($.fn.DataTable.isDataTable('#dataTable')){$('#dataTable').DataTable().destroy();$('#dataTable tbody').empty();}
-    const tb=document.querySelector('#dataTable tbody');
-    rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r.Year??''}</td><td>${r.IndustrySector??''}</td><td>${r.IndividualSetting??''}</td><td>${r.IndCode??''}</td><td>${(+r.Outbreaks||0).toLocaleString()}</td><td>${(+r.Cases||0).toLocaleString()}</td></tr>`));
-    $('#dataTable').DataTable({pageLength:10,lengthMenu:[10,25,50,100],order:[[4,'desc']],responsive:true,dom:'<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',language:{search:"_INPUT_",searchPlaceholder:"Search table..."}});
-  }
+  /* CONFIG & SETUP */
+  const CSV_PATH='covid-19occu.csv';const BAR_PRIMARY='#0d6efd';const BAR_ALT='#6f42c1';const PLOT_CFG={responsive:true,displayModeBar:false};const BASE_LAYOUT={margin:{l:60,r:20,t:10,b:120},yaxis:{title:'Number of Outbreaks',tickformat:',',gridcolor:'rgba(0,0,0,.1)',fixedrange:true},xaxis:{tickangle:-45,automargin:true,fixedrange:true},hoverlabel:{bgcolor:'#fff',font:{size:12}},paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)'};
+  document.addEventListener('DOMContentLoaded',()=>{Papa.parse(CSV_PATH,{download:true,header:true,dynamicTyping:true,skipEmptyLines:true,complete:({data,errors})=>errors.length?onError('Parse Error'):buildDashboard(data),error:err=>onError(err.message)});});function onError(m){console.error(m);alert('Error: '+m);}  
+  const aggregateTop=(arr,k,s,n,f=()=>true)=>Object.entries(arr.filter(f).reduce((a,r)=>{const key=r[k],v=+r[s]||0;if(key)a[key]=(a[key]||0)+v;return a;},{})).sort(([,A],[,B])=>B-A).slice(0,n);
+  function buildDashboard(rows){renderKpis(rows);plotSectorOutbreaks(rows);plotSectorCases(rows);plotSettingOutbreaks(rows);plotSettingCases(rows);populateTable(rows);}  
+  function renderKpis(rows){const wrap=document.getElementById('kpiRow');wrap.innerHTML='';const obY=rows.reduce((a,r)=>{const y=r.Year,v=+r.Outbreaks||0;if(y)a[y]=(a[y]||0)+v;return a;},{});const years=Object.keys(obY).sort();const totalCases=rows.reduce((t,r)=>t+(+r.Cases||0),0);const sectors=new Set(rows.map(r=>r.IndustrySector).filter(Boolean)).size;const settings=new Set(rows.map(r=>r.IndividualSetting).filter(Boolean)).size;const kpis=[...years.map(y=>({label:`OUTBREAKS ${y}`,value:obY[y]})),{label:'TOTAL CASES',value:totalCases},{label:'INDUSTRY SECTORS',value:sectors},{label:'INDIVIDUAL SETTINGS',value:settings}];const palette=['bg-indigo','bg-teal','bg-amber','bg-emerald','bg-coral','bg-violet','bg-sky','bg-slate'];kpis.forEach((k,i)=>wrap.insertAdjacentHTML('beforeend',`<div class="kpi-card ${palette[i%palette.length]}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${(+k.value||0).toLocaleString()}</div></div>`));}
+  function plotSectorOutbreaks(rows){const d=aggregateTop(rows,'IndustrySector','Outbreaks',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));Plotly.newPlot('sectorChart',[{type:'bar',x:d.map(x=>x[0]),y:d.map(x=>x[1]),marker:{color:BAR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],BASE_LAYOUT,PLOT_CFG);}  
+  function plotSectorCases(rows){const d=aggregateTop(rows,'IndustrySector','Cases',Infinity,r=>!['total',''].includes(String(r.IndustrySector).toLowerCase().trim()));const l={...BASE_LAYOUT,yaxis:{...BASE_LAYOUT.yaxis,title:'Total Cases'}};Plotly.newPlot('sectorCasesChart',[{type:'bar',x:d.map(x=>x[0]),y:d.map(x=>x[1]),marker:{color:BAR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],l,PLOT_CFG);}  
+  function plotSettingOutbreaks(rows){const d=aggregateTop(rows,'IndividualSetting','Outbreaks',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));Plotly.newPlot('settingChart',[{type:'bar',x:d.map(x=>x[0]),y:d.map(x=>x[1]),marker:{color:BAR_PRIMARY},hovertemplate:'%{x}: %{y:,} outbreaks<extra></extra>'}],BASE_LAYOUT,PLOT_CFG);}  
+  function plotSettingCases(rows){const d=aggregateTop(rows,'IndividualSetting','Cases',10,r=>!['total','all settings','all setting','all',''].includes(String(r.IndividualSetting).toLowerCase().trim()));const l={...BASE_LAYOUT,yaxis:{...BASE_LAYOUT.yaxis,title:'Total Cases'}};Plotly.newPlot('settingCasesChart',[{type:'bar',x:d.map(x=>x[0]),y:d.map(x=>x[1]),marker:{color:BAR_ALT},hovertemplate:'%{x}: %{y:,} cases<extra></extra>'}],l,PLOT_CFG);}  
+  function populateTable(rows){if($.fn.DataTable.isDataTable('#dataTable')){$('#dataTable').DataTable().destroy();$('#dataTable tbody').empty();}const tb=document.querySelector('#dataTable tbody');rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r.Year??''}</td><td>${r.IndustrySector??''}</td><td>${r.IndividualSetting??''}</td><td>${r.IndCode??''}</td><td>${(+r.Outbreaks||0).toLocaleString()}</td><td>${(+r.Cases||0).toLocaleString()}</td></tr>`));$('#dataTable').DataTable({pageLength:10,lengthMenu:[10,25,50,100],order:[[4,'desc']],responsive:true,dom:'<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',language:{search:"_INPUT_",searchPlaceholder:"Search table..."}});}  
   </script>
 </body>
 </html>
